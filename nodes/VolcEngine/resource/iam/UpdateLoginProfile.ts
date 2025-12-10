@@ -36,10 +36,6 @@ const UpdateLoginProfileOperate: ResourceOperations = {
 			type: 'options',
 			options: [
 				{
-					name: '不修改',
-					value: '',
-				},
-				{
 					name: '允许登录',
 					value: 'true',
 				},
@@ -48,7 +44,7 @@ const UpdateLoginProfileOperate: ResourceOperations = {
 					value: 'false',
 				},
 			],
-			default: '',
+			default: 'true',
 			description: '是否允许登录。true代表允许，false代表不允许，默认为false。',
 		},
 		{
@@ -56,10 +52,6 @@ const UpdateLoginProfileOperate: ResourceOperations = {
 			name: 'passwordResetRequired',
 			type: 'options',
 			options: [
-				{
-					name: '不修改',
-					value: '',
-				},
 				{
 					name: '需要重设密码',
 					value: 'true',
@@ -69,7 +61,7 @@ const UpdateLoginProfileOperate: ResourceOperations = {
 					value: 'false',
 				},
 			],
-			default: '',
+			default: 'false',
 			description: '下次登录是否需要重设密码。true代表允许，false代表不允许，默认为false。',
 		},
 		{
@@ -77,10 +69,6 @@ const UpdateLoginProfileOperate: ResourceOperations = {
 			name: 'safeAuthFlag',
 			type: 'options',
 			options: [
-				{
-					name: '不修改',
-					value: '',
-				},
 				{
 					name: '开启登录保护',
 					value: 'true',
@@ -90,7 +78,7 @@ const UpdateLoginProfileOperate: ResourceOperations = {
 					value: 'false',
 				},
 			],
-			default: '',
+			default: 'false',
 			description: '是否开启登录保护。true代表开启，false代表不开启，默认为false。',
 		},
 		{
@@ -99,27 +87,23 @@ const UpdateLoginProfileOperate: ResourceOperations = {
 			type: 'options',
 			options: [
 				{
-					name: '不修改',
-					value: '',
+					name: 'Email',
+					value: 'email',
 				},
 				{
-					name: '设备验证 (MFA)',
+					name: 'MFA',
 					value: 'vmfa',
 				},
 				{
-					name: '手机+邮箱验证',
-					value: 'phone,email',
-				},
-				{
-					name: '手机验证 (Phone)',
+					name: 'Phone',
 					value: 'phone',
 				},
 				{
-					name: '邮箱验证 (Email)',
-					value: 'email',
+					name: 'Phone + Email',
+					value: 'phone,email',
 				},
 			],
-			default: '',
+			default: 'phone',
 			description: '登录保护类型。phone代表手机验证，email代表邮箱验证，vmfa代表MFA设备验证。支持设置多种操作保护类型，以英文逗号分隔。',
 		},
 		{
@@ -127,10 +111,6 @@ const UpdateLoginProfileOperate: ResourceOperations = {
 			name: 'safeAuthExemptRequired',
 			type: 'options',
 			options: [
-				{
-					name: '不修改',
-					value: '',
-				},
 				{
 					name: '不开启登录保护豁免',
 					value: '0',
@@ -140,7 +120,7 @@ const UpdateLoginProfileOperate: ResourceOperations = {
 					value: '1',
 				},
 			],
-			default: '',
+			default: '0',
 			description: '是否开启登录保护豁免。0代表不开启，1代表开启。开启登录保护豁免后，验证完成后一定时间内登录将不再进行验证。',
 		},
 		{
@@ -148,10 +128,6 @@ const UpdateLoginProfileOperate: ResourceOperations = {
 			name: 'safeAuthExemptUnit',
 			type: 'options',
 			options: [
-				{
-					name: '不修改',
-					value: '',
-				},
 				{
 					name: '分钟',
 					value: '0',
@@ -165,7 +141,7 @@ const UpdateLoginProfileOperate: ResourceOperations = {
 					value: '2',
 				},
 			],
-			default: '',
+			default: '0',
 			description: '豁免的时间单位。0代表分钟，1代表小时，2代表天。',
 		},
 		{
