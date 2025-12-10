@@ -4,8 +4,7 @@
  */
 
 import Signer from './sign';
-import fetch from './fetch';
-import { AxiosRequestConfig } from 'axios';
+import { defaultHttpRequest, createRequestFn } from './fetch';
 import qs from 'querystring';
 import {
 	OpenApiResponse,
@@ -13,6 +12,8 @@ import {
 	CreateAPIParams,
 	FetchParams,
 	ServiceOptionsBase,
+	HttpRequestFn,
+	RequestInfo,
 } from './types';
 
 const defaultOptions = {
@@ -27,9 +28,13 @@ export default class Service {
 			...defaultOptions,
 			...options,
 		};
+		this.requestFn = options.httpRequestFn
+			? createRequestFn(options.httpRequestFn)
+			: defaultHttpRequest;
 	}
 
 	private options: ServiceOptions;
+	private requestFn: <Result>(url: string, reqInfo: RequestInfo) => Promise<OpenApiResponse<Result>>;
 
 	setAccessKeyId = (accessKeyId: string): void => {
 		this.options.accessKeyId = accessKeyId;
@@ -49,6 +54,11 @@ export default class Service {
 
 	setHost = (host: string): void => {
 		this.options.host = host;
+	};
+
+	setHttpRequestFn = (httpRequestFn: HttpRequestFn): void => {
+		this.options.httpRequestFn = httpRequestFn;
+		this.requestFn = createRequestFn(httpRequestFn);
 	};
 
 	getSessionToken = (): string | undefined => this.options.sessionToken;
@@ -107,10 +117,10 @@ export default class Service {
 		const { Version, method = 'GET', contentType = 'urlencode', queryKeys = [] } = createParams || {};
 		return (
 			requestData: RequestData,
-			params?: FetchParams & AxiosRequestConfig,
+			params?: FetchParams & RequestInfo,
 			options?: ServiceOptionsBase,
 		) => {
-			const requestParams: FetchParams & AxiosRequestConfig = {
+			const requestParams: FetchParams & RequestInfo = {
 				...params,
 				method: method as 'GET' | 'POST' | 'PUT' | 'DELETE',
 				Action,
@@ -147,7 +157,7 @@ export default class Service {
 							.forEach((key) => {
 								body.append(key, String(requestData[key]));
 							});
-						requestParams.data = body;
+						requestParams.data = body.toString();
 						break;
 					}
 					default: {
@@ -160,7 +170,7 @@ export default class Service {
 	}
 
 	fetchOpenAPI<Result>(
-		params: FetchParams & AxiosRequestConfig,
+		params: FetchParams & RequestInfo,
 		options?: ServiceOptionsBase,
 	): Promise<OpenApiResponse<Result>> {
 		const realOptions = {
@@ -209,9 +219,9 @@ export default class Service {
 		}${requestInit.pathname}`;
 		const queryString = qs.stringify(requestParams as Record<string, string>);
 		if (queryString) uri += '?' + queryString;
-		return fetch(uri, {
+		return this.requestFn(uri, {
 			...requestInit,
 			params: undefined,
-		} as AxiosRequestConfig);
+		} as RequestInfo);
 	}
 }

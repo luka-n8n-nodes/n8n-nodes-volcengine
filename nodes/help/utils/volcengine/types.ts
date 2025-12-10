@@ -3,8 +3,6 @@
  * 移植自 @volcengine/openapi
  */
 
-import { Method } from 'axios';
-
 export interface OpenApiError {
 	Code?: string;
 	Message: string;
@@ -72,6 +70,10 @@ export interface ServiceOptionsBase extends CredentialsBase {
 	 * 默认 API 版本
 	 */
 	defaultVersion?: string;
+	/**
+	 * 自定义 HTTP 请求函数
+	 */
+	httpRequestFn?: HttpRequestFn;
 }
 
 export interface ServiceOptions extends ServiceOptionsBase {
@@ -84,7 +86,7 @@ export interface FetchParams {
 	query?: Record<string, unknown>;
 	pathname?: string;
 	method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
-	data?: Record<string, unknown>;
+	data?: Record<string, unknown> | string;
 	headers?: Record<string, string>;
 }
 
@@ -96,7 +98,7 @@ export interface CreateAPIParams {
 	/**
 	 * HTTP 方法，如 GET POST PUT
 	 */
-	method?: Method;
+	method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 	/**
 	 * Body 内容类型，支持: json urlencode
 	 */
@@ -106,3 +108,31 @@ export interface CreateAPIParams {
 	 */
 	queryKeys?: string[];
 }
+
+/**
+ * 请求信息
+ */
+export interface RequestInfo {
+	method?: string;
+	headers?: Record<string, string>;
+	data?: unknown;
+	params?: Record<string, unknown>;
+}
+
+/**
+ * n8n HTTP 请求选项
+ */
+export interface N8nHttpRequestOptions {
+	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+	url: string;
+	headers?: Record<string, string>;
+	body?: string | Record<string, unknown>;
+	json?: boolean;
+	returnFullResponse?: boolean;
+	skipSslCertificateValidation?: boolean;
+}
+
+/**
+ * HTTP 请求函数类型
+ */
+export type HttpRequestFn = (options: N8nHttpRequestOptions) => Promise<unknown>;

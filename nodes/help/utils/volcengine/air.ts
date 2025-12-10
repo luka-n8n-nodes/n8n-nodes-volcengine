@@ -4,9 +4,8 @@
  */
 
 import Signer from './sign';
-import fetch from './fetch';
-import { AxiosRequestConfig } from 'axios';
-import { OpenApiResponse, ServiceOptionsBase } from './types';
+import { defaultHttpRequest, createRequestFn } from './fetch';
+import { OpenApiResponse, ServiceOptionsBase, HttpRequestFn, RequestInfo } from './types';
 
 /**
  * 知识库服务配置选项
@@ -279,12 +278,16 @@ const defaultOptions = {
  */
 export class AirService {
 	private options: AirServiceOptions;
+	private requestFn: <Result>(url: string, reqInfo: RequestInfo) => Promise<OpenApiResponse<Result>>;
 
 	constructor(options?: AirServiceOptions) {
 		this.options = {
 			...defaultOptions,
 			...options,
 		};
+		this.requestFn = options?.httpRequestFn
+			? createRequestFn(options.httpRequestFn)
+			: defaultHttpRequest;
 	}
 
 	setAccessKeyId = (accessKeyId: string): void => {
@@ -309,6 +312,11 @@ export class AirService {
 
 	setAccountId = (accountId: string): void => {
 		this.options.accountId = accountId;
+	};
+
+	setHttpRequestFn = (httpRequestFn: HttpRequestFn): void => {
+		this.options.httpRequestFn = httpRequestFn;
+		this.requestFn = createRequestFn(httpRequestFn);
 	};
 
 	getAccessKeyId = (): string | undefined => this.options.accessKeyId;
@@ -379,16 +387,16 @@ export class AirService {
 		}
 
 		// 发送请求
-		const reqConfig: AxiosRequestConfig = {
+		const reqInfo: RequestInfo = {
 			method,
 			headers: requestObj.headers,
 		};
 
 		if (data && method === 'POST') {
-			reqConfig.data = data;
+			reqInfo.data = data;
 		}
 
-		return fetch<Result>(uri, reqConfig);
+		return this.requestFn<Result>(uri, reqInfo);
 	}
 
 	// ============ 知识库 API 方法 ============
