@@ -47,7 +47,10 @@ jobs:
           node-version: '22.x'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
-          always-auth: true
+
+      # OIDC Trusted Publishing 需要 npm 11.5.1+
+      - name: 📦 升级 npm 版本
+        run: npm install -g npm@latest
 
       - name: 📦 安装依赖
         run: npm ci
