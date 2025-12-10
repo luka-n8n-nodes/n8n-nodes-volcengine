@@ -1,6 +1,6 @@
 {
     "name": "@luka-cat-mimi/n8n-nodes-volcengine",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "火山引擎 N8N 集成插件",
     "keywords": [
         "n8n",
@@ -51,10 +51,10 @@
         "@types/crypto-js": "^4.2.0",
         "@types/node": "^20.0.0",
         "@n8n/node-cli": "*",
-		"eslint": "9.32.0",
-		"prettier": "3.6.2",
-		"release-it": "^19.0.4",
-		"typescript": "5.9.2",
+        "eslint": "9.32.0",
+        "prettier": "3.6.2",
+        "release-it": "^19.0.4",
+        "typescript": "5.9.2",
         "glob": "^10.4.5",
         "gulp": "^5.0.0",
         "require-glob": "^4.1.0"
