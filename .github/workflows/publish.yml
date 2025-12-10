@@ -106,18 +106,14 @@ jobs:
           echo "NEW_VERSION=v$CURRENT_VERSION" >> $GITHUB_ENV
           echo "🧪 Dry Run 模式 - 当前版本: v$CURRENT_VERSION"
 
-      # ===== 4. NPM 发布 =====
+      # ===== 4. NPM 发布 (使用 OIDC Trusted Publishing) =====
       - name: 🚀 发布到 NPM
         if: github.event.inputs.dry_run != 'true'
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: 🧪 模拟发布（Dry Run）
         if: github.event.inputs.dry_run == 'true'
         run: npm publish --dry-run --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # ===== 5. 生成变更日志 =====
       - name: 📋 生成变更日志
@@ -221,8 +217,8 @@ jobs:
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
           echo "请检查以下内容:"
-          echo "1. NPM_TOKEN 是否配置正确"
-          echo "2. GitHub Token 权限是否足够"
+          echo "1. npm Trusted Publisher 是否配置正确（环境名：正式环境）"
+          echo "2. GitHub Token 权限是否足够（需要 id-token: write）"
           echo "3. 代码是否通过 lint 检查"
           echo "4. 构建是否成功"
           echo ""
