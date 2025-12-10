@@ -69,7 +69,7 @@ export class VolcEngineApi implements ICredentialType {
                 {
                     name: '中国香港',
                     value: 'cn-hongkong',
-                }
+                },
             ],
             default: 'cn-beijing',
             required: true,
