@@ -1,6 +1,6 @@
 {
     "name": "@luka-cat-mimi/n8n-nodes-volcengine",
-    "version": "1.0.12",
+    "version": "1.0.13",
     "description": "火山引擎 N8N 集成插件",
     "keywords": [
         "n8n",
