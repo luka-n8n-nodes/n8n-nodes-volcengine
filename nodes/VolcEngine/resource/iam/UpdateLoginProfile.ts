@@ -103,6 +103,10 @@ const UpdateLoginProfileOperate: ResourceOperations = {
 					value: '',
 				},
 				{
+					name: '设备验证 (MFA)',
+					value: 'vmfa',
+				},
+				{
 					name: '手机+邮箱验证',
 					value: 'phone,email',
 				},
@@ -113,10 +117,6 @@ const UpdateLoginProfileOperate: ResourceOperations = {
 				{
 					name: '邮箱验证 (Email)',
 					value: 'email',
-				},
-				{
-					name: 'MFA设备验证 (Vmfa)',
-					value: 'vmfa',
 				},
 			],
 			default: '',
