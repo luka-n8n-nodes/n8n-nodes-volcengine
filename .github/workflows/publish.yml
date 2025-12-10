@@ -44,7 +44,7 @@ jobs:
       - name: 🔧 设置 Node.js 环境
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '22.x'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
           always-auth: true

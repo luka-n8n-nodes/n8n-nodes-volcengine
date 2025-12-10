@@ -131,7 +131,7 @@ export default class Service {
 				switch (contentType) {
 					case 'json': {
 						requestParams.headers = {
-							...requestParams.headers,
+							...(requestParams.headers as Record<string, string>),
 							'content-type': 'application/json; charset=utf-8',
 						};
 						requestParams.data = requestData;
