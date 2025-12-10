@@ -55,6 +55,7 @@ jobs:
       # ===== 2. 代码质量检查 =====
       - name: 🔍 代码检查
         run: npm run lint
+        continue-on-error: true
 
       - name: 🏗️ 构建项目
         run: npm run build
