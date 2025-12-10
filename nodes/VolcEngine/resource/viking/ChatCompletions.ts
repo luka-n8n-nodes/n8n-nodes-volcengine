@@ -72,7 +72,7 @@ const ChatCompletionsOperate: ResourceOperations = {
 			displayName: 'Additional Fields',
 			name: 'advancedOptions',
 			type: 'collection',
-			placeholder: 'Add Field, more details: https://www.volcengine.com/docs/84313/1350013?lang=zh',
+			placeholder: 'Add Field',
 			default: {},
 			options: [
 				{
