@@ -1,0 +1,229 @@
+name: 🚀 自动发布到 NPM 和 GitHub Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: '版本类型'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch   # 修复版本 1.0.0 -> 1.0.1
+          - minor   # 次要版本 1.0.0 -> 1.1.0
+          - major   # 主要版本 1.0.0 -> 2.0.0
+      dry_run:
+        description: '仅测试，不实际发布'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: 正式环境
+      url: https://www.npmjs.com/package/@luka-cat-mimi/n8n-nodes-volcengine
+
+    steps:
+      # ===== 1. 环境准备 =====
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🔧 设置 Node.js 环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+          always-auth: true
+
+      - name: 📦 安装依赖
+        run: npm ci
+
+      # ===== 2. 代码质量检查 =====
+      - name: 🔍 代码检查
+        run: npm run lint
+
+      - name: 🏗️ 构建项目
+        run: npm run build
+
+      - name: ✅ 验证构建产物
+        run: |
+          echo "📂 检查 dist 目录内容:"
+          ls -la dist/
+          
+          echo ""
+          echo "✅ 验证关键文件:"
+          test -f dist/nodes/VolcEngine/VolcEngine.node.js && echo "✅ VolcEngine.node.js"
+          test -f dist/credentials/VolcEngineApi.credentials.js && echo "✅ VolcEngineApi.credentials.js"
+          test -f dist/package.json && echo "✅ dist/package.json"
+          
+          echo ""
+          echo "📊 包大小:"
+          du -sh dist/
+
+      # ===== 3. 版本管理 =====
+      - name: 🔐 配置 Git
+        run: |
+          git config --local user.email "luka.cat.mimi@gmail.com"
+          git config --local user.name "luka-cat"
+
+      - name: 📝 更新版本号（手动触发）
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run != 'true'
+        run: |
+          NEW_VERSION=$(npm version ${{ github.event.inputs.version_type }} --no-git-tag-version)
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "📌 新版本: $NEW_VERSION"
+          
+          git add package.json package-lock.json
+          git commit -m "chore: release $NEW_VERSION"
+          git tag $NEW_VERSION -m "Release $NEW_VERSION"
+          git push origin HEAD:main --follow-tags
+
+      - name: 🏷️ 获取版本号（标签触发）
+        if: github.event_name == 'push'
+        run: |
+          echo "NEW_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          echo "📌 发布版本: ${GITHUB_REF#refs/tags/}"
+
+      - name: 🏷️ 获取版本号（Dry Run）
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'true'
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "NEW_VERSION=v$CURRENT_VERSION" >> $GITHUB_ENV
+          echo "🧪 Dry Run 模式 - 当前版本: v$CURRENT_VERSION"
+
+      # ===== 4. NPM 发布 =====
+      - name: 🚀 发布到 NPM
+        if: github.event.inputs.dry_run != 'true'
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: 🧪 模拟发布（Dry Run）
+        if: github.event.inputs.dry_run == 'true'
+        run: npm publish --dry-run --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # ===== 5. 生成变更日志 =====
+      - name: 📋 生成变更日志
+        id: changelog
+        run: |
+          echo "📝 生成变更日志..."
+          
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          if [ -n "$LAST_TAG" ]; then
+            echo "📊 对比版本: $LAST_TAG -> ${{ env.NEW_VERSION }}"
+          
+            FEATURES=$(git log $LAST_TAG..HEAD --pretty=format:"%s" --no-merges | grep -E "^feat|^feature" | sed 's/^/- ✨ /' || echo "")
+            FIXES=$(git log $LAST_TAG..HEAD --pretty=format:"%s" --no-merges | grep -E "^fix|^bugfix" | sed 's/^/- 🐛 /' || echo "")
+            DOCS=$(git log $LAST_TAG..HEAD --pretty=format:"%s" --no-merges | grep "^docs" | sed 's/^/- 📚 /' || echo "")
+            CHORES=$(git log $LAST_TAG..HEAD --pretty=format:"%s" --no-merges | grep "^chore" | sed 's/^/- 🔧 /' || echo "")
+          
+            CHANGELOG="## 🎉 版本 ${{ env.NEW_VERSION }}
+
+          ### ✨ 新特性
+          ${FEATURES:-无}
+
+          ### 🐛 问题修复
+          ${FIXES:-无}
+
+          ### 📚 文档更新
+          ${DOCS:-无}
+
+          ### 🔧 其他变更
+          ${CHORES:-无}"
+          else
+            CHANGELOG="## 🎉 首次发布 ${{ env.NEW_VERSION }}
+
+          ### ✨ 功能特性
+          - 🎯 支持火山引擎 VikingDB 知识库（搜索、多轮对话）
+          - 👥 支持 IAM 用户管理
+          - 🔧 支持自定义请求调用任意 OpenAPI"
+          fi
+          
+          CHANGELOG="$CHANGELOG
+
+          ### 📦 安装方式
+          \`\`\`bash
+          npm install @luka-cat-mimi/n8n-nodes-volcengine
+          \`\`\`
+
+          ### 🔗 相关链接
+          - 📖 [使用文档](https://github.com/luka-n8n-nodes/n8n-nodes-volcengine#readme)
+          - 📦 [NPM 包](https://www.npmjs.com/package/@luka-cat-mimi/n8n-nodes-volcengine)"
+          
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      # ===== 6. 创建 GitHub Release =====
+      - name: 🎊 创建 GitHub Release
+        if: github.event.inputs.dry_run != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.NEW_VERSION }}
+          name: Release ${{ env.NEW_VERSION }}
+          body: ${{ steps.changelog.outputs.CHANGELOG }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ===== 7. 发布通知 =====
+      - name: 🎉 发布成功通知
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🎉 发布成功！"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "📦 版本: ${{ env.NEW_VERSION }}"
+          echo "🔗 NPM: https://www.npmjs.com/package/@luka-cat-mimi/n8n-nodes-volcengine"
+          echo ""
+          echo "📋 安装命令:"
+          echo "npm install @luka-cat-mimi/n8n-nodes-volcengine"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      - name: 🧪 Dry Run 完成通知
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🧪 Dry Run 测试完成"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "✅ 所有检查通过，可以正式发布"
+          echo "📦 当前版本: ${{ env.NEW_VERSION }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      - name: ❌ 发布失败通知
+        if: failure()
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "❌ 发布失败"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "请检查以下内容:"
+          echo "1. NPM_TOKEN 是否配置正确"
+          echo "2. GitHub Token 权限是否足够"
+          echo "3. 代码是否通过 lint 检查"
+          echo "4. 构建是否成功"
+          echo ""
+          echo "查看详细日志: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
