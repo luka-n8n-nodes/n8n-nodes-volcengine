@@ -7,7 +7,7 @@ export class VolcEngineApi implements ICredentialType {
     name = 'volcEngineApi';
     displayName = '火山引擎 API';
     documentationUrl = 'https://www.volcengine.com/docs/6291/65568';
-    // @ts-ignore
+    // @ts-expect-error n8n 类型定义问题
     icon = 'file:icon.svg';
     properties: INodeProperties[] = [
         {

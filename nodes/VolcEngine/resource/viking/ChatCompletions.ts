@@ -148,7 +148,7 @@ const ChatCompletionsOperate: ResourceOperations = {
 			if (Array.isArray(history)) {
 				messages.push(...history);
 			}
-		} catch (e) {
+		} catch {
 			// 忽略解析错误
 		}
 
@@ -173,6 +173,7 @@ const ChatCompletionsOperate: ResourceOperations = {
 		}
 
 		// 调用多轮对话 API
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const result = await airService.chatCompletions(params as any);
 
 		return handleAirKnowledgeResponse(this, result) as IDataObject;

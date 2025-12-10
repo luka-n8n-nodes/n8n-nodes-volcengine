@@ -25,7 +25,7 @@ class ResourceFactory {
 				return b.order - a.order;
 			});
 			operates.forEach((operate: ResourceOperations) => {
-				// @ts-ignore
+				// @ts-expect-error 动态资源操作
 				resourceBuilder.addOperate(resource.value, operate);
 			});
 		});

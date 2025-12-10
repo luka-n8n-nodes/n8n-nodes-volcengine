@@ -122,7 +122,7 @@ export default class Signer {
 	}
 
 	getDateTime(date?: Date): string {
-		return this.iso8601(date).replace(/[:\-]|\.\d{3}/g, '');
+		return this.iso8601(date).replace(/[:-]|\.\d{3}/g, '');
 	}
 
 	addHeaders(credentials: Credentials, datetime: string): void {

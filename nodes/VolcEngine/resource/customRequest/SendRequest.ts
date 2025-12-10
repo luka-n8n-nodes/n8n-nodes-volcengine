@@ -327,7 +327,6 @@ const SendRequestOperate: ResourceOperations = {
 		}
 
 		// 创建通用服务实例
-		// @ts-ignore - serviceName 会在内部设置
 		const service = new Service({
 			serviceName,
 		});

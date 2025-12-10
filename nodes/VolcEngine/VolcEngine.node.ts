@@ -23,9 +23,7 @@ export class VolcEngine implements INodeType {
 			name: '火山引擎',
 		},
 		usableAsTool: true,
-		// @ts-ignore
 		inputs: ['main'],
-		// @ts-ignore
 		outputs: ['main'],
 		credentials: [
 			{
@@ -62,7 +60,7 @@ export class VolcEngine implements INodeType {
 					itemIndex,
 				});
 
-				responseData = await callFunc.call(this, itemIndex);
+				responseData = (await callFunc.call(this, itemIndex)) as IDataObject;
 			} catch (error) {
 				this.logger.error('call function error', {
 					resource,
@@ -73,7 +71,7 @@ export class VolcEngine implements INodeType {
 				});
 
 				if (this.continueOnFail()) {
-					let errorJson = {
+					const errorJson = {
 						error: error.message,
 					};
 					if (error.name === 'NodeApiError') {

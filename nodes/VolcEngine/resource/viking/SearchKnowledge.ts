@@ -133,7 +133,7 @@ const SearchKnowledgeOperate: ResourceOperations = {
 				if (Array.isArray(history) && history.length > 0) {
 					params.history = history;
 				}
-			} catch (e) {
+			} catch {
 				// 忽略解析错误
 			}
 		}
@@ -147,7 +147,7 @@ const SearchKnowledgeOperate: ResourceOperations = {
 				if (Object.keys(filter).length > 0) {
 					params.filter = filter;
 				}
-			} catch (e) {
+			} catch {
 				// 忽略解析错误
 			}
 		}
@@ -161,6 +161,7 @@ const SearchKnowledgeOperate: ResourceOperations = {
 		}
 
 		// 调用搜索知识库 API
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const result = await airService.searchKnowledge(params as any);
 
 		return handleAirKnowledgeResponse(this, result) as IDataObject;
