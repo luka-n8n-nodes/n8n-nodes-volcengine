@@ -33,68 +33,6 @@ export default class Service {
 	private options: ServiceOptions;
 	private requestFn: <Result>(url: string, reqInfo: RequestInfo) => Promise<OpenApiResponse<Result>>;
 
-	setAccessKeyId = (accessKeyId: string): void => {
-		this.options.accessKeyId = accessKeyId;
-	};
-
-	setSecretKey = (secretKey: string): void => {
-		this.options.secretKey = secretKey;
-	};
-
-	setSessionToken = (sessionToken: string): void => {
-		this.options.sessionToken = sessionToken;
-	};
-
-	setRegion = (region: string): void => {
-		this.options.region = region;
-	};
-
-	setHost = (host: string): void => {
-		this.options.host = host;
-	};
-
-	getSessionToken = (): string | undefined => this.options.sessionToken;
-
-	getAccessKeyId = (): string | undefined => this.options.accessKeyId;
-
-	getSecretKey = (): string | undefined => this.options.secretKey;
-
-	/**
-	 * 创建 JSON API
-	 * @param Action OpenAPI Action
-	 * @param createParams.Version OpenAPI 版本，如果不提供，将使用服务的 defaultVersion
-	 * @param createParams.method HTTP 方法，默认为 POST
-	 * @param createParams.contentType Body 内容类型，默认为 json
-	 */
-	createJSONAPI<RequestData extends Record<string, unknown>, Result>(
-		Action: string,
-		createParams?: CreateAPIParams,
-	) {
-		return this.createAPI<RequestData, Result>(Action, {
-			method: 'POST',
-			contentType: 'json',
-			...createParams,
-		});
-	}
-
-	/**
-	 * 创建 urlencode API
-	 * @param Action OpenAPI Action
-	 * @param createParams.Version OpenAPI 版本，如果不提供，将使用服务的 defaultVersion
-	 * @param createParams.method HTTP 方法，默认为 POST
-	 * @param createParams.contentType Body 内容类型，默认为 urlencode
-	 */
-	createUrlEncodeAPI<RequestData extends Record<string, unknown>, Result>(
-		Action: string,
-		createParams?: CreateAPIParams,
-	) {
-		return this.createAPI<RequestData, Result>(Action, {
-			method: 'POST',
-			contentType: 'urlencode',
-			...createParams,
-		});
-	}
-
 	/**
 	 * 创建 API 函数
 	 * @param Action OpenAPI Action

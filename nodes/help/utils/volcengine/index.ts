@@ -5,7 +5,6 @@
 
 export { default as Service } from './service';
 export { default as Signer } from './sign';
-export { queryParamsToString } from './sign';
 export * from './types';
 export * from './iam';
 export * from './air';

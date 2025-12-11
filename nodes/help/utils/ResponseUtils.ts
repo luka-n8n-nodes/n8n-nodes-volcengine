@@ -99,7 +99,3 @@ export function handleAirKnowledgeResponse(
 	return airResponse.data ?? { message: airResponse.message };
 }
 
-export default {
-	handleVolcEngineResponse,
-	handleAirKnowledgeResponse,
-};

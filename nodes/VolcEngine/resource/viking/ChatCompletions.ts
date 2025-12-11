@@ -1,7 +1,7 @@
 import { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { ResourceOperations } from '../../../help/type/IResource';
-import { AirService } from '../../../help/utils/volcengine';
 import { handleAirKnowledgeResponse } from '../../../help/utils/ResponseUtils';
+import { getVolcEngineCredentials, createAirService } from '../../../help/utils/CredentialsHelper';
 
 const ChatCompletionsOperate: ResourceOperations = {
 	name: 'Chat Completions',
@@ -112,11 +112,9 @@ const ChatCompletionsOperate: ResourceOperations = {
 		},
 	] as INodeProperties[],
 	async call(this: IExecuteFunctions, index: number): Promise<IDataObject | IDataObject[]> {
-		// 获取凭证
-		const credentials = await this.getCredentials('volcEngineApi', index);
-		const accessKeyId = credentials.accessKeyId as string;
-		const secretKey = credentials.secretKey as string;
-		const region = (credentials.region as string) || 'cn-north-1';
+		// 获取凭证并创建服务
+		const credentials = await getVolcEngineCredentials(this, index);
+		const airService = createAirService(credentials, this.helpers.httpRequest.bind(this.helpers));
 
 		// 获取参数
 		const model = this.getNodeParameter('model', index) as string;
@@ -124,14 +122,6 @@ const ChatCompletionsOperate: ResourceOperations = {
 		const systemPrompt = this.getNodeParameter('systemPrompt', index, '') as string;
 		const historyJson = this.getNodeParameter('history', index, '[]') as string;
 		const advancedOptions = this.getNodeParameter('advancedOptions', index, {}) as IDataObject;
-
-		// 创建 AIR 服务实例
-		const airService = new AirService({
-			accessKeyId,
-			secretKey,
-			region,
-			httpRequestFn: this.helpers.httpRequest.bind(this.helpers),
-		});
 
 		// 构建消息列表
 		const messages: Array<{ role: string; content: string }> = [];

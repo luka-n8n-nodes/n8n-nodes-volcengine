@@ -6,31 +6,6 @@
 import Service from './service';
 import { ServiceOptionsBase, HttpRequestFn } from './types';
 
-interface ListParams {
-	Limit?: number;
-	Offset?: number;
-	Query?: string;
-	[key: string]: unknown;
-}
-
-interface User {
-	CreateDate: string;
-	UpdateDate: string;
-	Status: string;
-	AccountId: number;
-	UserName: string;
-	Description: string;
-	DisplayName: string;
-	Email: string;
-	MobilePhone: string;
-	Trn: string;
-	Source: string;
-}
-
-interface ListUserResult {
-	UserMetadata: User[];
-}
-
 interface IamServiceOptions extends ServiceOptionsBase {
 	httpRequestFn: HttpRequestFn;
 }
@@ -43,6 +18,4 @@ export class IamService extends Service {
 			serviceName: 'iam',
 		});
 	}
-
-	ListUsers = this.createAPI<ListParams, ListUserResult>('ListUsers');
 }

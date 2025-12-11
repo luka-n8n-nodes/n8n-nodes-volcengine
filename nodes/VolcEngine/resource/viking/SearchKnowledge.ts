@@ -1,7 +1,7 @@
 import { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { ResourceOperations } from '../../../help/type/IResource';
-import { AirService } from '../../../help/utils/volcengine';
 import { handleAirKnowledgeResponse } from '../../../help/utils/ResponseUtils';
+import { getVolcEngineCredentials, createAirService } from '../../../help/utils/CredentialsHelper';
 
 const SearchKnowledgeOperate: ResourceOperations = {
 	name: 'Search Knowledge',
@@ -89,11 +89,9 @@ const SearchKnowledgeOperate: ResourceOperations = {
 		},
 	] as INodeProperties[],
 	async call(this: IExecuteFunctions, index: number): Promise<IDataObject | IDataObject[]> {
-		// 获取凭证
-		const credentials = await this.getCredentials('volcEngineApi', index);
-		const accessKeyId = credentials.accessKeyId as string;
-		const secretKey = credentials.secretKey as string;
-		const region = (credentials.region as string) || 'cn-north-1';
+		// 获取凭证并创建服务
+		const credentials = await getVolcEngineCredentials(this, index);
+		const airService = createAirService(credentials, this.helpers.httpRequest.bind(this.helpers));
 
 		// 获取参数
 		const collectionName = this.getNodeParameter('collectionName', index) as string;
@@ -101,14 +99,6 @@ const SearchKnowledgeOperate: ResourceOperations = {
 		const limit = this.getNodeParameter('limit', index, 5) as number;
 		const project = this.getNodeParameter('project', index, '') as string;
 		const advancedOptions = this.getNodeParameter('advancedOptions', index, {}) as IDataObject;
-
-		// 创建 AIR 服务实例
-		const airService = new AirService({
-			accessKeyId,
-			secretKey,
-			region,
-			httpRequestFn: this.helpers.httpRequest.bind(this.helpers),
-		});
 
 		// 构建请求参数
 		const params: Record<string, unknown> = {

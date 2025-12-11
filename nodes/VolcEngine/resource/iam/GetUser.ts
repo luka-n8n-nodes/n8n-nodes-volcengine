@@ -4,8 +4,8 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 import { ResourceOperations } from '../../../help/type/IResource';
-import { IamService } from '../../../help/utils/volcengine';
 import { handleVolcEngineResponse } from '../../../help/utils/ResponseUtils';
+import { getVolcEngineCredentials, createIamService } from '../../../help/utils/CredentialsHelper';
 
 const GetUserOperate: ResourceOperations = {
 	name: '查询用户详情',
@@ -28,29 +28,13 @@ const GetUserOperate: ResourceOperations = {
 		},
 	] as INodeProperties[],
 	async call(this: IExecuteFunctions, index: number): Promise<IDataObject | IDataObject[]> {
-		// 获取凭证
-		const credentials = await this.getCredentials('volcEngineApi', index);
-		const baseUrl = (credentials.baseUrl as string) || 'https://open.volcengineapi.com';
-		const accessKeyId = credentials.accessKeyId as string;
-		const secretKey = credentials.secretKey as string;
-		const region = credentials.region as string;
-
-		// 从 baseUrl 提取 host
-		const urlObj = new URL(baseUrl);
-		const host = urlObj.host;
+		// 获取凭证并创建服务
+		const credentials = await getVolcEngineCredentials(this, index);
+		const iamService = createIamService(credentials, this.helpers.httpRequest.bind(this.helpers));
 
 		// 获取参数
 		const userName = this.getNodeParameter('userName', index, '') as string;
 		const id = this.getNodeParameter('id', index, 0) as number;
-
-		// 创建 IAM 服务实例
-		const iamService = new IamService({
-			accessKeyId,
-			secretKey,
-			host,
-			region,
-			httpRequestFn: this.helpers.httpRequest.bind(this.helpers),
-		});
 
 		// 构建请求参数（UserName 和 ID 二选一）
 		const params: Record<string, unknown> = {};
@@ -73,4 +57,3 @@ const GetUserOperate: ResourceOperations = {
 };
 
 export default GetUserOperate;
-

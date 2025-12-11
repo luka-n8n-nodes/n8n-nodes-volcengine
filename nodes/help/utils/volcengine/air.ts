@@ -47,99 +47,6 @@ export interface AirRequestParams {
 	headers?: Record<string, string>;
 }
 
-// ============ 知识库类型定义 ============
-
-/**
- * 创建知识库参数
- */
-export interface CreateCollectionParams {
-	/** 知识库名称 */
-	name: string;
-	/** 数据类型 */
-	data_type?: 'unstructured_data' | 'structured_data';
-	/** 知识库描述 */
-	description?: string;
-	/** 预处理配置 */
-	preprocessing?: {
-		chunking_strategy?: 'custom_balance' | 'custom_fast' | 'custom_quality';
-		multi_modal?: ('image_ocr' | 'audio_asr')[];
-	};
-	/** 索引配置 */
-	index?: {
-		cpu_quota?: number;
-		embedding_model?: string;
-		embedding_dimension?: number;
-		quant?: 'int8' | 'float16' | 'float32';
-		index_type?: 'hnsw_hybrid' | 'hnsw' | 'flat';
-	};
-	/** 项目名称 */
-	project?: string;
-}
-
-/**
- * 知识库搜索参数
- */
-export interface SearchCollectionParams {
-	/** 知识库名称 */
-	name: string;
-	/** 搜索查询 */
-	query: string;
-	/** 返回结果数量 */
-	limit?: number;
-	/** 项目名称 */
-	project?: string;
-}
-
-/**
- * 知识库信息参数
- */
-export interface CollectionInfoParams {
-	/** 知识库名称 */
-	name: string;
-	/** 项目名称 */
-	project?: string;
-}
-
-/**
- * 知识库列表参数
- */
-export interface ListCollectionParams {
-	/** 项目名称 */
-	project?: string;
-	/** 分页大小 */
-	page_size?: number;
-	/** 分页偏移 */
-	page_offset?: number;
-}
-
-/**
- * 删除知识库参数
- */
-export interface DeleteCollectionParams {
-	/** 知识库名称 */
-	name: string;
-	/** 项目名称 */
-	project?: string;
-}
-
-/**
- * 知识库搜索并生成参数
- */
-export interface SearchAndGenerateParams {
-	/** 知识库名称 */
-	name: string;
-	/** 搜索查询 */
-	query: string;
-	/** 项目名称 */
-	project?: string;
-	/** 资源 ID */
-	resource_id?: string;
-	/** 是否流式返回 */
-	stream?: boolean;
-	/** 返回结果数量 */
-	limit?: number;
-}
-
 // ============ 搜索知识库类型定义 ============
 
 /**
@@ -223,18 +130,6 @@ export interface ChatCompletionsParams {
 }
 
 /**
- * Token 使用情况
- */
-export interface TokenUsage {
-	/** 提示词 token 数 */
-	prompt_tokens: number;
-	/** 生成 token 数 */
-	completion_tokens: number;
-	/** 总 token 数 */
-	total_tokens: number;
-}
-
-/**
  * 多轮对话响应数据
  */
 export interface ChatCompletionsResult {
@@ -245,30 +140,6 @@ export interface ChatCompletionsResult {
 	/** token 用量统计 (JSON 字符串) */
 	usage?: string;
 }
-
-/**
- * 可用的对话模型列表
- */
-export type ChatModel =
-	| 'Doubao-1-5-thinking-pro'
-	| 'Deepseek-V3-128k'
-	| 'Deepseek-R1-128k'
-	| 'Doubao-1-5-pro-256k'
-	| 'Doubao-1-5-pro-32k'
-	| 'Doubao-1-5-lite-32k'
-	| 'Doubao-pro-256k'
-	| 'Doubao-pro-32k'
-	| 'Doubao-pro-128k'
-	| 'Doubao-lite-32k'
-	| 'Doubao-lite-128k'
-	| 'Doubao-Seed-1-6-vision'
-	| 'Doubao-Seed-1-6-thinking'
-	| 'Doubao-Seed-1-6'
-	| 'Doubao-Seed-1-6-flash'
-	| 'Doubao-1-5-vision-pro'
-	| 'Doubao-1-5-vision-lite'
-	| 'Doubao-1-5-vision-pro-32k'
-	| 'Doubao-vision-pro-32k';
 
 // 默认配置
 const defaultOptions = {
@@ -291,34 +162,6 @@ export class AirService {
 		};
 		this.requestFn = createRequestFn(options.httpRequestFn);
 	}
-
-	setAccessKeyId = (accessKeyId: string): void => {
-		this.options.accessKeyId = accessKeyId;
-	};
-
-	setSecretKey = (secretKey: string): void => {
-		this.options.secretKey = secretKey;
-	};
-
-	setSessionToken = (sessionToken: string): void => {
-		this.options.sessionToken = sessionToken;
-	};
-
-	setRegion = (region: string): void => {
-		this.options.region = region;
-	};
-
-	setHost = (host: string): void => {
-		this.options.host = host;
-	};
-
-	setAccountId = (accountId: string): void => {
-		this.options.accountId = accountId;
-	};
-
-	getAccessKeyId = (): string | undefined => this.options.accessKeyId;
-
-	getSecretKey = (): string | undefined => this.options.secretKey;
 
 	/**
 	 * 发送知识库 API 请求
@@ -457,50 +300,6 @@ export class AirService {
 			pathname: '/api/knowledge/chat/completions',
 			method: 'POST',
 			data: requestBody,
-		});
-	}
-
-	/**
-	 * 简化的对话方法，支持单轮或多轮对话
-	 * @param query 用户问题
-	 * @param options 可选配置
-	 */
-	async chat(
-		query: string,
-		options?: {
-			model?: ChatModel | string;
-			systemPrompt?: string;
-			history?: ChatMessage[];
-			maxTokens?: number;
-			temperature?: number;
-		},
-	): Promise<OpenApiResponse<ChatCompletionsResult>> {
-		const messages: ChatMessage[] = [];
-
-		// 添加系统提示
-		if (options?.systemPrompt) {
-			messages.push({
-				role: 'system',
-				content: options.systemPrompt,
-			});
-		}
-
-		// 添加历史对话
-		if (options?.history) {
-			messages.push(...options.history);
-		}
-
-		// 添加当前用户问题
-		messages.push({
-			role: 'user',
-			content: query,
-		});
-
-		return this.chatCompletions({
-			model: options?.model || 'Doubao-1-5-pro-32k',
-			messages,
-			max_tokens: options?.maxTokens || 4096,
-			temperature: options?.temperature || 0.1,
 		});
 	}
 }
