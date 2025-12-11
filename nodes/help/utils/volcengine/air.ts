@@ -4,7 +4,7 @@
  */
 
 import Signer from './sign';
-import { defaultHttpRequest, createRequestFn } from './fetch';
+import { createRequestFn } from './fetch';
 import { OpenApiResponse, ServiceOptionsBase, HttpRequestFn, RequestInfo } from './types';
 
 /**
@@ -15,6 +15,10 @@ export interface AirServiceOptions extends ServiceOptionsBase {
 	 * 账户 ID (可选)
 	 */
 	accountId?: string;
+	/**
+	 * n8n HTTP 请求函数 (this.helpers.httpRequest)
+	 */
+	httpRequestFn: HttpRequestFn;
 }
 
 /**
@@ -280,14 +284,12 @@ export class AirService {
 	private options: AirServiceOptions;
 	private requestFn: <Result>(url: string, reqInfo: RequestInfo) => Promise<OpenApiResponse<Result>>;
 
-	constructor(options?: AirServiceOptions) {
+	constructor(options: AirServiceOptions) {
 		this.options = {
 			...defaultOptions,
 			...options,
 		};
-		this.requestFn = options?.httpRequestFn
-			? createRequestFn(options.httpRequestFn)
-			: defaultHttpRequest;
+		this.requestFn = createRequestFn(options.httpRequestFn);
 	}
 
 	setAccessKeyId = (accessKeyId: string): void => {
@@ -312,11 +314,6 @@ export class AirService {
 
 	setAccountId = (accountId: string): void => {
 		this.options.accountId = accountId;
-	};
-
-	setHttpRequestFn = (httpRequestFn: HttpRequestFn): void => {
-		this.options.httpRequestFn = httpRequestFn;
-		this.requestFn = createRequestFn(httpRequestFn);
 	};
 
 	getAccessKeyId = (): string | undefined => this.options.accessKeyId;
@@ -507,5 +504,3 @@ export class AirService {
 		});
 	}
 }
-
-export const defaultAirService = new AirService();

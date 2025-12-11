@@ -216,11 +216,13 @@ const UpdateLoginProfileOperate: ResourceOperations = {
 		const safeAuthExemptUnit = this.getNodeParameter('safeAuthExemptUnit', index, '') as string;
 
 		// 创建 IAM 服务实例
-		const iamService = new IamService();
-		iamService.setAccessKeyId(accessKeyId);
-		iamService.setSecretKey(secretKey);
-		iamService.setHost(host);
-		iamService.setRegion(region);
+		const iamService = new IamService({
+			accessKeyId,
+			secretKey,
+			host,
+			region,
+			httpRequestFn: this.helpers.httpRequest.bind(this.helpers),
+		});
 
 		// 构建请求参数
 		const params: Record<string, unknown> = {

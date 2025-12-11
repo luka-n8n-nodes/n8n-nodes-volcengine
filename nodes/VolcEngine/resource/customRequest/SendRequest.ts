@@ -329,11 +329,12 @@ const SendRequestOperate: ResourceOperations = {
 		// 创建通用服务实例
 		const service = new Service({
 			serviceName,
+			accessKeyId,
+			secretKey,
+			host,
+			region,
+			httpRequestFn: this.helpers.httpRequest.bind(this.helpers),
 		});
-		service.setAccessKeyId(accessKeyId);
-		service.setSecretKey(secretKey);
-		service.setHost(host);
-		service.setRegion(region);
 
 		// 发送请求
 		const result = await service.fetchOpenAPI({

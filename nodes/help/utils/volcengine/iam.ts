@@ -4,7 +4,7 @@
  */
 
 import Service from './service';
-import { ServiceOptionsBase } from './types';
+import { ServiceOptionsBase, HttpRequestFn } from './types';
 
 interface ListParams {
 	Limit?: number;
@@ -31,8 +31,12 @@ interface ListUserResult {
 	UserMetadata: User[];
 }
 
+interface IamServiceOptions extends ServiceOptionsBase {
+	httpRequestFn: HttpRequestFn;
+}
+
 export class IamService extends Service {
-	constructor(options?: ServiceOptionsBase) {
+	constructor(options: IamServiceOptions) {
 		super({
 			...options,
 			defaultVersion: '2018-01-01',
@@ -42,5 +46,3 @@ export class IamService extends Service {
 
 	ListUsers = this.createAPI<ListParams, ListUserResult>('ListUsers');
 }
-
-export const defaultService = new IamService();

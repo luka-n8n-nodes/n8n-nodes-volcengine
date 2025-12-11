@@ -103,10 +103,12 @@ const SearchKnowledgeOperate: ResourceOperations = {
 		const advancedOptions = this.getNodeParameter('advancedOptions', index, {}) as IDataObject;
 
 		// 创建 AIR 服务实例
-		const airService = new AirService();
-		airService.setAccessKeyId(accessKeyId);
-		airService.setSecretKey(secretKey);
-		airService.setRegion(region);
+		const airService = new AirService({
+			accessKeyId,
+			secretKey,
+			region,
+			httpRequestFn: this.helpers.httpRequest.bind(this.helpers),
+		});
 
 		// 构建请求参数
 		const params: Record<string, unknown> = {

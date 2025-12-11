@@ -1,4 +1,4 @@
-import { NodeApiError } from 'n8n-workflow';
+import { NodeApiError, JsonObject } from 'n8n-workflow';
 import type { IExecuteFunctions } from 'n8n-workflow';
 
 /**
@@ -55,14 +55,8 @@ export function handleVolcEngineResponse(
 
 	if (volcResponse?.ResponseMetadata?.Error) {
 		const error = volcResponse.ResponseMetadata.Error;
-		throw new NodeApiError(context.getNode(), {
-			message: error.Message,
-			description: `错误码: ${error.Code}`,
-			httpCode: error.Code,
-		}, {
-			message: error.Message,
-			description: `[${error.Code}] ${error.Message}`,
-			itemIndex: 0,
+		throw new NodeApiError(context.getNode(),error as JsonObject, {
+			message: error.Message as string
 		});
 	}
 

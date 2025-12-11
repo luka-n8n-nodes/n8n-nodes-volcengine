@@ -126,10 +126,12 @@ const ChatCompletionsOperate: ResourceOperations = {
 		const advancedOptions = this.getNodeParameter('advancedOptions', index, {}) as IDataObject;
 
 		// 创建 AIR 服务实例
-		const airService = new AirService();
-		airService.setAccessKeyId(accessKeyId);
-		airService.setSecretKey(secretKey);
-		airService.setRegion(region);
+		const airService = new AirService({
+			accessKeyId,
+			secretKey,
+			region,
+			httpRequestFn: this.helpers.httpRequest.bind(this.helpers),
+		});
 
 		// 构建消息列表
 		const messages: Array<{ role: string; content: string }> = [];

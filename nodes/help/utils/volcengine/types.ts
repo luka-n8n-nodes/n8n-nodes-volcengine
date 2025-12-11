@@ -70,14 +70,14 @@ export interface ServiceOptionsBase extends CredentialsBase {
 	 * 默认 API 版本
 	 */
 	defaultVersion?: string;
-	/**
-	 * 自定义 HTTP 请求函数
-	 */
-	httpRequestFn?: HttpRequestFn;
 }
 
 export interface ServiceOptions extends ServiceOptionsBase {
 	serviceName: string;
+	/**
+	 * n8n HTTP 请求函数 (this.helpers.httpRequest)
+	 */
+	httpRequestFn: HttpRequestFn;
 }
 
 export interface FetchParams {
@@ -130,6 +130,8 @@ export interface N8nHttpRequestOptions {
 	json?: boolean;
 	returnFullResponse?: boolean;
 	skipSslCertificateValidation?: boolean;
+	/** 忽略 HTTP 状态码错误，始终返回响应体 */
+	ignoreHttpStatusErrors?: boolean;
 }
 
 /**

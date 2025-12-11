@@ -4,7 +4,7 @@
  */
 
 import Signer from './sign';
-import { defaultHttpRequest, createRequestFn } from './fetch';
+import { createRequestFn } from './fetch';
 import qs from 'querystring';
 import {
 	OpenApiResponse,
@@ -12,7 +12,6 @@ import {
 	CreateAPIParams,
 	FetchParams,
 	ServiceOptionsBase,
-	HttpRequestFn,
 	RequestInfo,
 } from './types';
 
@@ -28,9 +27,7 @@ export default class Service {
 			...defaultOptions,
 			...options,
 		};
-		this.requestFn = options.httpRequestFn
-			? createRequestFn(options.httpRequestFn)
-			: defaultHttpRequest;
+		this.requestFn = createRequestFn(options.httpRequestFn);
 	}
 
 	private options: ServiceOptions;
@@ -54,11 +51,6 @@ export default class Service {
 
 	setHost = (host: string): void => {
 		this.options.host = host;
-	};
-
-	setHttpRequestFn = (httpRequestFn: HttpRequestFn): void => {
-		this.options.httpRequestFn = httpRequestFn;
-		this.requestFn = createRequestFn(httpRequestFn);
 	};
 
 	getSessionToken = (): string | undefined => this.options.sessionToken;
